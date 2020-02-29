@@ -1,0 +1,11 @@
+﻿name: PlotmeRoadClear
+main: cc.baka9.plotmeroadclear.PlotmeRoadClear
+version: '1.0.0'
+softdepend: [PlotMe]
+commands:
+  PlotmeRoadClear:
+      usage: |
+        /<command> start
+        /<command> stop
+        /<command> run
+      permission: plotmeroadclear.command.admin
