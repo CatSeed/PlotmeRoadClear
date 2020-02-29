@@ -10,7 +10,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.util.Random;
+import java.util.HashSet;
+import java.util.Set;
 
 public class PlotmeRoadClear extends JavaPlugin {
     @Override
@@ -19,6 +20,8 @@ public class PlotmeRoadClear extends JavaPlugin {
     }
 
     private BukkitTask bukkitTask;
+    private Set<String> clearChunk = new HashSet<>();
+
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args){
@@ -27,15 +30,7 @@ public class PlotmeRoadClear extends JavaPlugin {
                 bukkitTask = getServer().getScheduler().runTaskTimer(this, new Runnable() {
                     @Override
                     public void run(){
-                        for (World world : Bukkit.getWorlds()) {
-                            PlotMapInfo plotMapInfo = PlotManager.getMap(world);
-                            if (plotMapInfo != null) {
-                                RoadClear roadClear = new RoadClear(plotMapInfo);
-                                for (Chunk chunk : world.getLoadedChunks()) {
-                                    roadClear.populate(world, chunk);
-                                }
-                            }
-                        }
+                        clear();
 
                     }
                 }, 0L, 20L * 10);
@@ -56,18 +51,26 @@ public class PlotmeRoadClear extends JavaPlugin {
             return true;
         }
         if (args.length > 0 && "run".equalsIgnoreCase(args[0])) {
-            for (World world : Bukkit.getWorlds()) {
-                PlotMapInfo plotMapInfo = PlotManager.getMap(world);
-                if (plotMapInfo != null) {
-                    RoadClear roadClear = new RoadClear(plotMapInfo);
-                    for (Chunk chunk : world.getLoadedChunks()) {
-                        roadClear.populate(world, chunk);
-                    }
-                }
-            }
+            clear();
             sender.sendMessage("已清理道路...");
             return true;
         }
         return false;
+    }
+
+    private void clear(){
+        for (World world : Bukkit.getWorlds()) {
+            PlotMapInfo plotMapInfo = PlotManager.getMap(world);
+            if (plotMapInfo != null) {
+                RoadClear roadClear = new RoadClear(plotMapInfo);
+                for (Chunk chunk : world.getLoadedChunks()) {
+                    String id = chunk.getX() + " " + chunk.getZ();
+                    if (!clearChunk.contains(id)) {
+                        roadClear.populate(world, chunk);
+                        clearChunk.add(id);
+                    }
+                }
+            }
+        }
     }
 }
